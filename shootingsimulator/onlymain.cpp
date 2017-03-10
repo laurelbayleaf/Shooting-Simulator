@@ -1,4 +1,4 @@
-Ôªø
+
 # include <Siv3D.hpp>
 # include <HamFramework.hpp>
 # include "shooting.h"
@@ -50,7 +50,7 @@ void Main()
 	//int scores[6] = { 0,0,0,0,0,0 };
 	//std::string name[6] = { "A","B","C","D","E","F" };
 	//String str;
-	//int command = 0; //Èö†„Åó„Ç≥„Éû„É≥„ÉâÁî®„Éï„É©„Ç∞
+	//int command = 0; //âBÇµÉRÉ}ÉìÉhópÉtÉâÉO
 	//String commando;
 
 
@@ -84,13 +84,15 @@ void Main()
 	o1.x = (Window::Width() - 200) / 2;
 	int time = 0, equiped = normalcanonn;
 	bool shoot = 0, Hit = 0;
-	Point ammopos = Mouse::Pos(); //Âºæ„ÅÆÂ∫ßÊ®ô
-	Array<Vec2> bullets0, bullets1, bullet2, targets;
-				//normal,straight,guided
+	Point ammopos = Mouse::Pos(); //íeÇÃç¿ïW
+	const Sound scanonn(L"resource/canonn.mp3");
+	const Sound slaser(L"resource/laser.mp3");
+	const Sound smissile(L"resource/missile.mp3");
+	const Sound hit(L"resource/hit.mp3");
+	Array<Vec2> shots,/* bullets,*/ targets;
 
-	shooting gun_normalcannon(40, 50, 60, 0, -1, Palette::White);
-	shooting gun_laser(50, 30, 15, 1, -1, Palette::Aqua);
-	shooting gun_missile(50, 50, 120, 2, 0.1, Palette::Brown);
+	shooting normalcannon();
+
 	while (System::Update())
 	{
 		switch (scene)
@@ -112,10 +114,10 @@ void Main()
 
 				const auto t1 = camera.createTransformer();
 
-				font(L"\n\n„Ç´„É°„É©").draw();
+				font(L"\n\nÉJÉÅÉâ").draw();
 
 				if (Input::KeyT.clicked)
-					targets.emplace_back(Random(30,640),Random(30,480));
+					targets.emplace_back(Random(30, 640), Random(30, 480));
 
 				for (const auto& target : targets)
 					RectF(30, 30).setCenter(target).draw(Palette::Limegreen);
@@ -125,8 +127,7 @@ void Main()
 				o1.moveBy(posx, 0);
 				if ((o1.x < 0 && posx < 0) || (Window::Width() - gamestage < o1.x && posx > 0))
 				{
-
-					posx *= -1; //ÂèçÂ∞Ñ
+					posx *= -1; //îΩéÀ
 					if (posx > 0) {
 						o1.x = 0;
 					}
@@ -138,8 +139,6 @@ void Main()
 				}
 
 
-				//Áô∫Â∞ÑÊ©üÊßã
-
 
 				if (Input::KeyUp.clicked && equiped != GUN::null)
 				{
@@ -149,43 +148,107 @@ void Main()
 				{
 					equiped--;
 				}
-				gun_normalcannon.shoot();
-				gun_normalcannon.bullet();
 
-				//if (Hit) {
-				//	c1 = o1.intersects(shot);
-				//	Hit = 0;
-				//	Erase_if(targets, [&](const Vec2& t) {
-				//		if (t.distanceFrom(ammopos) < 15.0){ 
-				//			hit.playMulti();
-				//			Circle(shot.x, shot.y, 30).draw(Palette::Red);//ÁàÜÈ¢®
-				//			return true;
+				Circle shot(ammopos, size); //íe
 
-				//		}
-				//		else
-				//		{
-				//			return false;
-				//		}
-				//	});
-				//}
-				//if (c1) {
-				//	hit.playMulti();
-				//	Circle(shot.x, shot.y, 30).draw(Palette::Red);//ÁàÜÈ¢®
-				//	c1 = 0;
-				//}
+				if (Input::MouseL.clicked && !shoot)
+				{
+					shoot = 1; //íeî≠éÀ
+					switch (equiped)
+					{
+					case normalcanonn:
+						scanonn.playMulti(0.4);
+						size = 40;
+						time = 50;
+						break;
+					case laser:
+						slaser.playMulti();
+						size = 50;
+						time = 30;
+						break;
+					case missile:
+						smissile.playMulti();
+						size = 50;
+						time = 50;
+					default:
+						break;
+					}
+				}
+
+				if (shoot)
+				{
+					switch (equiped)
+					{
+					case normalcanonn:
+						size -= time / 33.0; //íeë¨ìx
+						ammopos.y += (double)(0.1 * (50 - time) - 2.0);
+						time--;
+						shot.draw();
+						font(time).draw();
+
+						break;
+					case laser:
+						size -= size * 0.15;
+						time--;
+						shot.draw(Palette::Aqua);
+						break;
+					case missile:
+						size--;
+						ammopos.x -= 0.1*(ammopos.x - Mouse::Pos().x);
+						ammopos.y -= 0.1*(ammopos.y - Mouse::Pos().y);
+						time--;
+						font(shot.x, L" ", shot.y).draw();
+						font(Mouse::Pos()).draw(0, 40);
+						shot.draw(Palette::Brown);
+						break;
+					default:
+						break;
+					}
+
+					if (time <= 0)
+					{
+						Hit = 1;
+						shoot = 0;
+						size = 0;
+					}
+				}
+				else {
+					ammopos = Mouse::Pos(); //à íuìØä˙
+				}
+				if (Hit) {
+					c1 = o1.intersects(shot);
+					Hit = 0;
+					Erase_if(targets, [&](const Vec2& t) {
+						if (t.distanceFrom(ammopos) < 15.0) {
+							hit.playMulti();
+							Circle(shot.x, shot.y, 30).draw(Palette::Red);//îöïó
+							return true;
+
+						}
+						else
+						{
+							return false;
+						}
+					});
+				}
+				if (c1) {
+					hit.playMulti();
+					Circle(shot.x, shot.y, 30).draw(Palette::Red);//îöïó
+					c1 = 0;
+				}
 				const Point	sightpos = Mouse::Pos();
-				//Circle(sightpos, 10).draw(Palette::Yellow);//ÁÖßÊ∫ñ
+				//Circle(sightpos, 10).draw(Palette::Yellow);//è∆èÄ
 				Line(sightpos.x - 50, sightpos.y, sightpos.x + 50, sightpos.y).draw();
 				Line(sightpos.x, sightpos.y - 50, sightpos.x, sightpos.y + 50).draw();
 				Circle sightframe(sightpos, 50);
 				sightframe.drawFrame(3, 0);
 				//sightframe.drawFrame(0, 2000,Palette::Black);
 
-				
+
 
 			}
 			camera.draw(Palette::Orange);
-			//„Éù„Éº„Ç∫
+			//É|Å[ÉY
 			font(L"PAUSE:P").draw(450, 20);
 			if (Input::KeyP.clicked) {
 				scene = PAUSE;
@@ -195,7 +258,7 @@ void Main()
 		}
 		case PAUSE:
 			title(L"P A U S E").drawCenter(100);
-			font(L"Á∂ö„Åë„Çã„Å´„ÅØÔº∞„Ç≠„Éº").drawCenter(200);
+			font(L"ë±ÇØÇÈÇ…ÇÕÇoÉLÅ[").drawCenter(200);
 			if (Input::KeyP.clicked) {
 				scene = GAME;
 				ep.playMulti();
