@@ -1,6 +1,6 @@
 #include "shooting.h"
 
-shooting::shooting(int si, int sp, int ra, int t, int a, s3d::Color c)
+shooting::shooting(double si, int sp, int ra, int t, int a, s3d::Color c,Sound s)
 {
 	size = si;
 	speed = sp;
@@ -8,6 +8,7 @@ shooting::shooting(int si, int sp, int ra, int t, int a, s3d::Color c)
 	type = t;
 	alpha = a;
 	color = c;
+	se = s;
 }
 
 shooting::~shooting()
@@ -16,58 +17,81 @@ shooting::~shooting()
 
 void shooting::shoot()
 {
-	const Sound scanonn(L"resource/canonn.mp3");
-	const Sound slaser(L"resource/laser.mp3");
-	const Sound smissile(L"resource/missile.mp3");
-	const Sound hit(L"resource/hit.mp3");
-
-
-	if(Input::MouseL.clicked&&Input::MouseL.released >=rate){
-		switch (type)
+	if (Input::MouseL.clicked && !shoted)
 	{
-	case normal:
-		bullets.emplace_back(Mouse::Pos,size, speed);
-		scanonn.playMulti(0.4);
+		switch (type)
+		{
+		case normal:
+			//bullets.emplace_back(Mouse::Pos,size, speed);
+			shoted = true;
+			bulletpoint = Mouse::Pos();
+			Bsize = size;
+			Bspeed = speed;
+			se.playMulti(0.4);
 
-		break;
-	default:
-		break;
+			break;
+		default:
+			break;
+		}
 	}
-
-	}
-
 }
 
 void shooting::bullet()
 {
-	switch (type)
+	if (shoted)
 	{
-	case normal:
-		for (const auto& bullet : bullets) {
-			Circle(bullet.x,bullet.y).draw(color);
-			shotnormal(bullet,alpha);
-			sizedown(bullet);
+		//for (const auto& bullet : bullets) {
 
-		}
-			
+			makebullet().draw(color);
+			bulletpoint.y += (double)(0.1 * (50 - Bspeed) - 2.0);
+			Bsize -= Bspeed / 33.0; //’e‘¬“x
+			Bspeed--;
+			if (Bspeed <=0)
+			{
+				shoted = false;
+				hit = true;
+			}
 
-		break;
-	default:
-		break;
+			//shotnormal(alpha);
+			//sizedown();
+
+		//}
+
 	}
 
 }
 
-void shooting::shotnormal(Vec4 name, int a)
+bool shooting::gethit()
 {
-		name.y += (double)(0.1 * (50 - name.z) - 2.0);
-		name.z -= name.w / 33.0; //’e‘¬“x
-
+	return hit;
 }
 
-void shooting::sizedown(Vec4 name)
+void shooting::unhit()
 {
-	name.w--;
+	hit = false;
 }
+
+Circle shooting::makebullet()
+{
+	return Circle(bulletpoint, Bsize);
+}
+
+Point shooting::ammopos()
+{
+	return Point(bulletpoint);
+}
+
+//void shooting::shotnormal(/*Vec4 name,*/ int a)
+//{
+//		name.y += (double)(0.1 * (50 - name.z) - 2.0);
+//		name.z -= name.w / 33.0; //’e‘¬“x
+//
+//}
+
+//void shooting::sizedown(/*Vec4 name*/)
+//{
+//	name.w--;
+//}
+
 
 

@@ -76,6 +76,10 @@ void Main()
 		null,
 	};
 
+	const Sound scanonn(L"resource/canonn.mp3");
+	const Sound slaser(L"resource/laser.mp3");
+	const Sound smissile(L"resource/missile.mp3");
+	const Sound hit(L"resource/hit.mp3");
 
 	Rect o1(0, 200, 100, 50);
 	int posx = 5;
@@ -83,14 +87,12 @@ void Main()
 	double size = 50;
 	o1.x = (Window::Width() - 200) / 2;
 	int time = 0, equiped = normalcanonn;
-	bool shoot = 0, Hit = 0;
-	Point ammopos = Mouse::Pos(); //弾の座標
 	Array<Vec2> bullets0, bullets1, bullet2, targets;
 				//normal,straight,guided
 
-	shooting gun_normalcannon(40, 50, 60, 0, -1, Palette::White);
-	shooting gun_laser(50, 30, 15, 1, -1, Palette::Aqua);
-	shooting gun_missile(50, 50, 120, 2, 0.1, Palette::Brown);
+	shooting gun_normalcannon(40, 50, 60, 0, -1, Palette::White,scanonn);
+	shooting gun_laser(50, 30, 15, 1, -1, Palette::Aqua,slaser);
+	shooting gun_missile(50, 50, 120, 2, 0.1, Palette::Brown,smissile);
 	while (System::Update())
 	{
 		switch (scene)
@@ -114,11 +116,14 @@ void Main()
 
 				font(L"\n\nカメラ").draw();
 
+				// target
 				if (Input::KeyT.clicked)
 					targets.emplace_back(Random(30,640),Random(30,480));
 
 				for (const auto& target : targets)
 					RectF(30, 30).setCenter(target).draw(Palette::Limegreen);
+
+				 
 
 				o1.draw(Palette::Blue);
 
@@ -151,28 +156,28 @@ void Main()
 				}
 				gun_normalcannon.shoot();
 				gun_normalcannon.bullet();
+				if (gun_normalcannon.gethit())
+				{
+					gun_normalcannon.unhit();
+					c1 = o1.intersects(gun_normalcannon.makebullet());
+					Erase_if(targets, [&](const Vec2& t) {
+						if (t.distanceFrom(gun_normalcannon.ammopos()) < 15.0){
+							hit.playMulti();
+							Circle(gun_normalcannon.ammopos(), 30).draw(Palette::Red);//爆風
+							return true;
+						}
+						else
+						{
+							return false;
+						}
+					});
 
-				//if (Hit) {
-				//	c1 = o1.intersects(shot);
-				//	Hit = 0;
-				//	Erase_if(targets, [&](const Vec2& t) {
-				//		if (t.distanceFrom(ammopos) < 15.0){ 
-				//			hit.playMulti();
-				//			Circle(shot.x, shot.y, 30).draw(Palette::Red);//爆風
-				//			return true;
-
-				//		}
-				//		else
-				//		{
-				//			return false;
-				//		}
-				//	});
-				//}
-				//if (c1) {
-				//	hit.playMulti();
-				//	Circle(shot.x, shot.y, 30).draw(Palette::Red);//爆風
-				//	c1 = 0;
-				//}
+				}
+				if (c1) {
+					hit.playMulti();
+					Circle(gun_normalcannon.ammopos(), 30).draw(Palette::Red);//爆風
+					c1 = 0;
+				}
 				const Point	sightpos = Mouse::Pos();
 				//Circle(sightpos, 10).draw(Palette::Yellow);//照準
 				Line(sightpos.x - 50, sightpos.y, sightpos.x + 50, sightpos.y).draw();
@@ -180,8 +185,6 @@ void Main()
 				Circle sightframe(sightpos, 50);
 				sightframe.drawFrame(3, 0);
 				//sightframe.drawFrame(0, 2000,Palette::Black);
-
-				
 
 			}
 			camera.draw(Palette::Orange);
