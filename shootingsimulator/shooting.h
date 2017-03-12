@@ -11,18 +11,17 @@ private:
 		normal,
 		straight,
 		guided,
-		null,
 	};
-	int speed, rate, type, alpha, Bspeed;
-	double size, Bsize = 0;
+	int speed, rate, type, time;
+	double alpha,size, Bsize = 0;
 	bool shoted = false, hit = false;
-	Point bulletpoint;
+	Point bulletpoint,bulletvelocity;
 	Sound se;
 	s3d::Color color;
 	//Array<Vec4> bullets; 
 
 public:
-	shooting(double si, int sp, int ra, int t, int a, s3d::Color c,Sound s);
+	shooting(double si, int sp, int ra, int t, double a, s3d::Color c,Sound s);
 	~shooting();
 	void shoot();
 	void bullet();
@@ -30,7 +29,5 @@ public:
 	void unhit();
 	Circle makebullet();
 	Point ammopos();
-	//void shotnormal(Vec4 name,int a);
-	//void sizedown(Vec4 name);
 };
 

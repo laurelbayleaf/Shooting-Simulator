@@ -83,16 +83,17 @@ void Main()
 
 	Rect o1(0, 200, 100, 50);
 	int posx = 5;
-	bool c1 = 0;
-	double size = 50;
 	o1.x = (Window::Width() - 200) / 2;
-	int time = 0, equiped = normalcanonn;
+	int equiped = normalcanonn;
 	Array<Vec2> bullets0, bullets1, bullet2, targets;
 				//normal,straight,guided
+
+	//武器種
 
 	shooting gun_normalcannon(40, 50, 60, 0, -1, Palette::White,scanonn);
 	shooting gun_laser(50, 30, 15, 1, -1, Palette::Aqua,slaser);
 	shooting gun_missile(50, 50, 120, 2, 0.1, Palette::Brown,smissile);
+
 	while (System::Update())
 	{
 		switch (scene)
@@ -125,8 +126,6 @@ void Main()
 
 				 
 
-				o1.draw(Palette::Blue);
-
 				o1.moveBy(posx, 0);
 				if ((o1.x < 0 && posx < 0) || (Window::Width() - gamestage < o1.x && posx > 0))
 				{
@@ -141,11 +140,13 @@ void Main()
 
 					s1.playMulti();
 				}
+				o1.draw(Palette::Blue);
 
 
 				//発射機構
 
 
+				//武器選択
 				if (Input::KeyUp.clicked && equiped != GUN::null)
 				{
 					equiped++;
@@ -154,14 +155,41 @@ void Main()
 				{
 					equiped--;
 				}
-				gun_normalcannon.shoot();
+
+				//武器毎の発射処理
+				switch (equiped)
+				{
+				case normalcanonn:
+					gun_normalcannon.shoot();
+					break;
+				case laser:
+					gun_laser.shoot();
+					break;
+				case missile:
+					gun_missile.shoot();
+					break;
+				default:
+					break;
+				}
+
+
+				//弾丸更新
 				gun_normalcannon.bullet();
+				gun_laser.bullet();
+				gun_missile.bullet();
+
+
+				//命中判定
 				if (gun_normalcannon.gethit())
 				{
 					gun_normalcannon.unhit();
-					c1 = o1.intersects(gun_normalcannon.makebullet());
+					if (o1.intersects(gun_normalcannon.makebullet())) {
+						hit.playMulti();
+						Circle(gun_normalcannon.ammopos(), 30).draw(Palette::Red);//爆風
+					}
+
 					Erase_if(targets, [&](const Vec2& t) {
-						if (t.distanceFrom(gun_normalcannon.ammopos()) < 15.0){
+						if (t.distanceFrom(gun_normalcannon.ammopos()) < 15.0) {
 							hit.playMulti();
 							Circle(gun_normalcannon.ammopos(), 30).draw(Palette::Red);//爆風
 							return true;
@@ -173,16 +201,54 @@ void Main()
 					});
 
 				}
-				if (c1) {
-					hit.playMulti();
-					Circle(gun_normalcannon.ammopos(), 30).draw(Palette::Red);//爆風
-					c1 = 0;
+				if (gun_laser.gethit())
+				{
+					gun_laser.unhit();
+					if (o1.intersects(gun_laser.makebullet())) {
+						hit.playMulti();
+						Circle(gun_laser.ammopos(), 30).draw(Palette::Red);//爆風
+					}
+
+					Erase_if(targets, [&](const Vec2& t) {
+						if (t.distanceFrom(gun_laser.ammopos()) < 15.0) {
+							hit.playMulti();
+							Circle(gun_laser.ammopos(), 30).draw(Palette::Red);//爆風
+							return true;
+						}
+						else
+						{
+							return false;
+						}
+					});
+
 				}
-				const Point	sightpos = Mouse::Pos();
-				//Circle(sightpos, 10).draw(Palette::Yellow);//照準
-				Line(sightpos.x - 50, sightpos.y, sightpos.x + 50, sightpos.y).draw();
-				Line(sightpos.x, sightpos.y - 50, sightpos.x, sightpos.y + 50).draw();
-				Circle sightframe(sightpos, 50);
+				if (gun_missile.gethit())
+				{
+					gun_missile.unhit();
+					if (o1.intersects(gun_missile.makebullet())) {
+						hit.playMulti();
+						Circle(gun_missile.ammopos(), 50).draw(Palette::Red);//爆風
+					}
+
+					Erase_if(targets, [&](const Vec2& t) {
+						if (t.distanceFrom(gun_missile.ammopos()) < 15.0) {
+							hit.playMulti();
+							Circle(gun_missile.ammopos(), 50).draw(Palette::Red);//爆風
+							return true;
+						}
+						else
+						{
+							return false;
+						}
+					});
+
+				}
+
+
+				//照準
+				Line(Mouse::Pos().x - 50, Mouse::Pos().y, Mouse::Pos().x + 50, Mouse::Pos().y).draw();
+				Line(Mouse::Pos().x, Mouse::Pos().y - 50, Mouse::Pos().x, Mouse::Pos().y + 50).draw();
+				Circle sightframe(Mouse::Pos(), 50);
 				sightframe.drawFrame(3, 0);
 				//sightframe.drawFrame(0, 2000,Palette::Black);
 
