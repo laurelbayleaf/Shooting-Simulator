@@ -1,10 +1,11 @@
 #include "shooting.h"
 
-shooting::shooting(double si, int sp, int ra, int t, double a, s3d::Color c,Sound s)
+shooting::shooting(double si, int sp, int ra, int b, TYPE t, double a, s3d::Color c,Sound s)
 {
 	size = si;
 	speed = sp;
 	rate = ra;
+	boom = b;
 	type = t;
 	alpha = a;
 	color = c;
@@ -95,6 +96,11 @@ Circle shooting::makebullet()
 Point shooting::ammopos()
 {
 	return Point(bulletpoint);
+}
+
+int shooting::boomrange()
+{
+	return boom;
 }
 
 

@@ -5,23 +5,14 @@
 
 class shooting
 {
-private:
+public:
 	enum TYPE
 	{
 		normal,
 		straight,
 		guided,
 	};
-	int speed, rate, type, time;
-	double alpha,size, Bsize = 0;
-	bool shoted = false, hit = false;
-	Point bulletpoint,bulletvelocity;
-	Sound se;
-	s3d::Color color;
-	//Array<Vec4> bullets; 
-
-public:
-	shooting(double si, int sp, int ra, int t, double a, s3d::Color c,Sound s);
+	shooting(double si, int sp, int ra, int	b, TYPE t, double a, s3d::Color c, Sound s);
 	~shooting();
 	void shoot();
 	void bullet();
@@ -29,5 +20,14 @@ public:
 	void unhit();
 	Circle makebullet();
 	Point ammopos();
+	int boomrange();
+private:
+	int speed, rate, time, boom;
+	double alpha,size, Bsize = 0;
+	bool shoted = false, hit = false;
+	Point bulletpoint,bulletvelocity;
+	TYPE type;
+	Sound se;
+	s3d::Color color;
 };
 

@@ -2,6 +2,9 @@
 # include <Siv3D.hpp>
 # include <HamFramework.hpp>
 # include "shooting.h"
+# include "target.h"
+
+//void hittargetsystem(shooting);
 
 void Main()
 {
@@ -43,7 +46,6 @@ void Main()
 	const Font coment(15);
 
 	//int stage = 1, stagescore = 300, score = 0, roll = 0;
-	int gamestage = 100;
 	//double radian = Radians(roll);
 
 
@@ -68,31 +70,33 @@ void Main()
 	};
 	SCENE scene = GAME;
 
+	//使用可能武器
+
 	enum GUN
 	{
-		normalcanonn,
+		normalcannon,
 		laser,
 		missile,
 		null,
 	};
+	int equiped = normalcannon;
 
-	const Sound scanonn(L"resource/canonn.mp3");
+	const Sound scannon(L"resource/cannon.mp3");
 	const Sound slaser(L"resource/laser.mp3");
 	const Sound smissile(L"resource/missile.mp3");
 	const Sound hit(L"resource/hit.mp3");
 
-	Rect o1(0, 200, 100, 50);
-	int posx = 5;
-	o1.x = (Window::Width() - 200) / 2;
-	int equiped = normalcanonn;
-	Array<Vec2> bullets0, bullets1, bullet2, targets;
-				//normal,straight,guided
-
 	//武器種
 
-	shooting gun_normalcannon(40, 50, 60, 0, -1, Palette::White,scanonn);
-	shooting gun_laser(50, 30, 15, 1, -1, Palette::Aqua,slaser);
-	shooting gun_missile(50, 50, 120, 2, 0.1, Palette::Brown,smissile);
+	shooting gun_normalcannon(40, 50, 60, 30, shooting::TYPE::normal, -1, Palette::White,scannon);
+	shooting gun_laser(50, 30, 15, 30, shooting::TYPE::straight, -1, Palette::Aqua,slaser);
+	shooting gun_missile(50, 50, 120, 50, shooting::TYPE::guided, 0.1, Palette::Brown,smissile);
+
+	//的種
+
+	target small_circle(target::TYPE::circle, 15,-1, -1, Palette::Limegreen);
+	target small_box(target::TYPE::box, 30, -1,-1, Palette::Aquamarine);
+	target small_moved_box(target::TYPE::moved_box,100,50,5,Palette::Blue);
 
 	while (System::Update())
 	{
@@ -117,33 +121,38 @@ void Main()
 
 				font(L"\n\nカメラ").draw();
 
-				// target
-				if (Input::KeyT.clicked)
-					targets.emplace_back(Random(30,640),Random(30,480));
 
-				for (const auto& target : targets)
-					RectF(30, 30).setCenter(target).draw(Palette::Limegreen);
+				////  的関連  ////
 
-				 
 
-				o1.moveBy(posx, 0);
-				if ((o1.x < 0 && posx < 0) || (Window::Width() - gamestage < o1.x && posx > 0))
-				{
-
-					posx *= -1; //反射
-					if (posx > 0) {
-						o1.x = 0;
-					}
-					else {
-						o1.x = Window::Width() - gamestage;
-					}
-
-					s1.playMulti();
+				//的追加
+				if (Input::KeyT.clicked) {
+					Point random;
+					random.x = Random(30, 640);
+					random.y = Random(30, 480);
+					small_box.addtarget(random);
 				}
-				o1.draw(Palette::Blue);
+				if (Input::KeyY.clicked) {
+					Point random;
+					random.x = Random(30, 590);
+					random.y = Random(30, 430);
+					small_circle.addtarget(random);
+				}
+				if (Input::KeyU.clicked) {
+					Point random;
+					random.x = Random(30,540);
+					random.y = Random(30,430);
+					small_moved_box.addtarget(random);
+				}
+
+				//的描画
+
+				small_box.drawtarget();
+				small_circle.drawtarget();
+				small_moved_box.drawtarget();
 
 
-				//発射機構
+				////  発射機構  ////
 
 
 				//武器選択
@@ -151,7 +160,7 @@ void Main()
 				{
 					equiped++;
 				}
-				if (Input::KeyDown.clicked && equiped != GUN::normalcanonn)
+				if (Input::KeyDown.clicked && equiped != GUN::normalcannon)
 				{
 					equiped--;
 				}
@@ -159,7 +168,7 @@ void Main()
 				//武器毎の発射処理
 				switch (equiped)
 				{
-				case normalcanonn:
+				case normalcannon:
 					gun_normalcannon.shoot();
 					break;
 				case laser:
@@ -180,68 +189,28 @@ void Main()
 
 
 				//命中判定
+
 				if (gun_normalcannon.gethit())
 				{
 					gun_normalcannon.unhit();
-					if (o1.intersects(gun_normalcannon.makebullet())) {
-						hit.playMulti();
-						Circle(gun_normalcannon.ammopos(), 30).draw(Palette::Red);//爆風
-					}
-
-					Erase_if(targets, [&](const Vec2& t) {
-						if (t.distanceFrom(gun_normalcannon.ammopos()) < 15.0) {
-							hit.playMulti();
-							Circle(gun_normalcannon.ammopos(), 30).draw(Palette::Red);//爆風
-							return true;
-						}
-						else
-						{
-							return false;
-						}
-					});
-
+					small_box.hittarget(gun_normalcannon,hit);
+					small_circle.hittarget(gun_normalcannon,hit);
+					small_moved_box.hittarget(gun_normalcannon,hit);
 				}
 				if (gun_laser.gethit())
 				{
 					gun_laser.unhit();
-					if (o1.intersects(gun_laser.makebullet())) {
-						hit.playMulti();
-						Circle(gun_laser.ammopos(), 30).draw(Palette::Red);//爆風
-					}
-
-					Erase_if(targets, [&](const Vec2& t) {
-						if (t.distanceFrom(gun_laser.ammopos()) < 15.0) {
-							hit.playMulti();
-							Circle(gun_laser.ammopos(), 30).draw(Palette::Red);//爆風
-							return true;
-						}
-						else
-						{
-							return false;
-						}
-					});
+					small_box.hittarget(gun_laser,hit);
+					small_circle.hittarget(gun_laser,hit);
+					small_moved_box.hittarget(gun_laser,hit);
 
 				}
 				if (gun_missile.gethit())
 				{
 					gun_missile.unhit();
-					if (o1.intersects(gun_missile.makebullet())) {
-						hit.playMulti();
-						Circle(gun_missile.ammopos(), 50).draw(Palette::Red);//爆風
-					}
-
-					Erase_if(targets, [&](const Vec2& t) {
-						if (t.distanceFrom(gun_missile.ammopos()) < 15.0) {
-							hit.playMulti();
-							Circle(gun_missile.ammopos(), 50).draw(Palette::Red);//爆風
-							return true;
-						}
-						else
-						{
-							return false;
-						}
-					});
-
+					small_box.hittarget(gun_missile,hit);
+					small_circle.hittarget(gun_missile,hit);
+					small_moved_box.hittarget(gun_missile,hit);
 				}
 
 
