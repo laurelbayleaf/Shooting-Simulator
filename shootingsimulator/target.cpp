@@ -64,14 +64,14 @@ void target::movextarget(Vec3 &v)
 	}
 }
 
-void target::hittarget(shooting S, Sound se)
+void target::hittarget(Bullet b, Sound se)
 {
 	if (type == moved_box)
 	{
 		Erase_if(movetargets, [&](Vec3 t) {
-			if (Rect((int)size, (int)size2).setCenter((int)t.x, (int)t.y).intersects(S.ammopos())) {
+			if (Rect((int)size, (int)size2).setCenter((int)t.x, (int)t.y).intersects(b.bulletpoint)) {
 				se.playMulti();
-				Circle(S.ammopos(), S.boomrange()).draw(Palette::Red);//”š•—
+				Circle(b.bulletpoint, b.boom).draw(Palette::Red);//”š•—
 				return true;
 			}
 			else
@@ -84,9 +84,9 @@ void target::hittarget(shooting S, Sound se)
 	{
 		Erase_if(targets, [&](const Point& t) {
 			if (type == circle) {
-				if (Circle(t, size).intersects(S.ammopos())) {
+				if (Circle(t, size).intersects(b.bulletpoint)) {
 					se.playMulti();
-					Circle(S.ammopos(), S.boomrange()).draw(Palette::Red);//”š•—
+					Circle(b.bulletpoint, b.boom).draw(Palette::Red);//”š•—
 					return true;
 				}
 				else
@@ -97,9 +97,9 @@ void target::hittarget(shooting S, Sound se)
 			}
 			else
 			{
-				if (Rect((int)size).setCenter(t).intersects(S.ammopos())) {
+				if (Rect((int)size).setCenter(t).intersects(b.bulletpoint)) {
 					se.playMulti();
-					Circle(S.ammopos(), S.boomrange()).draw(Palette::Red);//”š•—
+					Circle(b.bulletpoint, b.boom).draw(Palette::Red);//”š•—
 					return true;
 				}
 				else

@@ -16,7 +16,7 @@ public:
 	void addtarget(Point p);
 	void drawtarget();
 	void movextarget(Vec3 &v);
-	void hittarget(shooting S,Sound se);
+	void hittarget(Bullet b,Sound se);
 
 private:
 

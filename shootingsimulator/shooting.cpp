@@ -1,5 +1,5 @@
 #include "shooting.h"
-
+#include "Bullet.h"
 shooting::shooting(double si, int sp, int ra, int b, TYPE t, double a, s3d::Color c,Sound s)
 {
 	size = si;
@@ -18,89 +18,48 @@ shooting::~shooting()
 
 void shooting::shoot()
 {
-	if (Input::MouseL.clicked && !shoted)
+	if (Input::MouseL.clicked && (charge <= 0))
 	{
-		shoted = true;
-		bulletpoint = Mouse::Pos();
-		Bsize = size;
-		time = speed;
+		bullets.emplace_back(size, speed, boom, alpha);
 		se.playMulti(0.4);
+		charge += rate;
+	}
+	else if (charge != 0)
+	{
+		charge--;
 	}
 }
 
 void shooting::bullet()
 {
-	if (shoted)
-	{
-		makebullet().draw(color);
+	for (auto& b : bullets) {
+		Circle(b.bulletpoint, b.size).draw(color);
 
 		switch (type)
 		{
 		case normal:
-			bulletpoint.y += (double)(0.1 * (50 - time) - 2.0);
-			Bsize -= time / 33.0; //’e‘¬“x
+			b.bulletpoint.y += (double)(0.1 * (50 - b.speed) - 2.0);
+			b.size -= b.speed / 33.0; //’e‘¬“x
 			break;
 		case straight:
-			Bsize -= Bsize * 0.15;
+			b.size -= b.size * 0.15;
 			break;
 		case guided:
-			Bsize--;
-			if (0.1*(bulletpoint.x - Mouse::Pos().x) >= 5) {
-				bulletvelocity.x = 5;
-			}
-			else
-			{
-				bulletvelocity.x = 0.1*(bulletpoint.x - Mouse::Pos().x);
-			}
-			if (0.1*(bulletpoint.y - Mouse::Pos().y) >= 5) {
-				bulletvelocity.y = 5;
-			}
-			else
-			{
-				bulletvelocity.y = 0.1*(bulletpoint.y - Mouse::Pos().y);
-			}
-
-			bulletpoint -= bulletvelocity;
+			b.size--;
+			if (0.1*(b.bulletpoint.x - Mouse::Pos().x) >= 5)b.bulletvelocity.x = 5;
+			else b.bulletvelocity.x = 0.1*(b.bulletpoint.x - Mouse::Pos().x);
+			if (0.1*(b.bulletpoint.y - Mouse::Pos().y) >= 5)b.bulletvelocity.y = 5;
+			else b.bulletvelocity.y = 0.1*(b.bulletpoint.y - Mouse::Pos().y);
+			b.bulletpoint -= b.bulletvelocity;
 			break;
 		default:
 			break;
 		}
 
-		time--;
-		if (time <= 0)
+		b.speed--;
+		if (b.speed <= 0)
 		{
-			shoted = false;
-			hit = true;
+			b.hit = true;
 		}
-
-
 	}
-
 }
-
-bool shooting::gethit()
-{
-	return hit;
-}
-
-void shooting::unhit()
-{
-	hit = false;
-}
-
-Circle shooting::makebullet()
-{
-	return Circle(bulletpoint, Bsize);
-}
-
-Point shooting::ammopos()
-{
-	return Point(bulletpoint);
-}
-
-int shooting::boomrange()
-{
-	return boom;
-}
-
-

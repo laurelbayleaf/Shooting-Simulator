@@ -27,14 +27,14 @@ void Main()
 	const Sound cannon(L"resource/cannnon.mp3");
 	const Sound heal(L"resource/heal.mp3");
 
-	const Sound s1(L"resource/bassdrum.mp3");
-	const Sound s2(L"resource/snare.mp3");
-	const Sound s3(L"resource/hat.mp3");
-	const Sound s4(L"resource/dum.mp3");
-	const Sound sdo(L"resource/belldo.mp3");
-	const Sound sfa(L"resource/bellfa.mp3");
-	const Sound sso(L"resource/bellso.mp3");
-	const Sound sra(L"resource/bellra.mp3");
+	//const Sound s1(L"resource/bassdrum.mp3");
+	//const Sound s2(L"resource/snare.mp3");
+	//const Sound s3(L"resource/hat.mp3");
+	//const Sound s4(L"resource/dum.mp3");
+	//const Sound sdo(L"resource/belldo.mp3");
+	//const Sound sfa(L"resource/bellfa.mp3");
+	//const Sound sso(L"resource/bellso.mp3");
+	//const Sound sra(L"resource/bellra.mp3");
 
 	const Sound stageclear(L"resource/clear.mp3");
 	const Sound gameover(L"resource/gameover.mp3");
@@ -47,7 +47,7 @@ void Main()
 
 	//int stage = 1, stagescore = 300, score = 0, roll = 0;
 	//double radian = Radians(roll);
-
+	int gamemode = 0;
 
 	//int scores[6] = { 0,0,0,0,0,0 };
 	//std::string name[6] = { "A","B","C","D","E","F" };
@@ -62,6 +62,7 @@ void Main()
 		GUIDANCE1,
 		GUIDANCE2,
 		MODE,
+		PRECEDE,
 		GAME,
 		PAUSE,
 		CLEAR,
@@ -88,9 +89,11 @@ void Main()
 
 	//武器種
 
-	shooting gun_normalcannon(40, 50, 60, 30, shooting::TYPE::normal, -1, Palette::White,scannon);
+	shooting gun_normalcannon(40, 50, 50, 30, shooting::TYPE::normal, -1, Palette::White,scannon);
 	shooting gun_laser(50, 30, 15, 30, shooting::TYPE::straight, -1, Palette::Aqua,slaser);
 	shooting gun_missile(50, 50, 120, 50, shooting::TYPE::guided, 0.1, Palette::Brown,smissile);
+
+
 
 	//的種
 
@@ -103,12 +106,57 @@ void Main()
 		switch (scene)
 		{
 		case TITLE:
+			titlebgm.play();
+			title(L"Shooting Simulator").drawCenter(100);
+			font(L"スペースキーを押してね").drawCenter(400);
+			if (Input::KeySpace.clicked)
+			{
+				scene = GUIDANCE1;
+				next.playMulti();
+			}
 			break;
 		case GUIDANCE1:
+			font(L" 的をよく狙おう！").draw(0,20);
+			font(L"照準はマウスで\n左クリックで発射！\n\n\tZキーで次へ").draw(300, 300);
+			if (Input::KeyZ.clicked)
+			{
+				scene = GUIDANCE2;
+				next.playMulti();
+			}
 			break;
 		case GUIDANCE2:
+			font(L"\n STAGE\t\t\t:現在のステージ\n SCORE\t\t\t:現在のスコア\n STAGESCORE\t:そのステージの持ち点\n\t\t\t\t ミスすると減点\n\t\t\t\t これがなくなると\n\t\t\t\t ゲームオーバー!").draw();
+			font(L"\n\n\n\tZキーで次へ").draw(300, 300);
+			if (Input::KeyZ.clicked)
+			{
+				gamemode = 1;
+				scene = MODE;
+				mode.playMulti();
+			}
+
 			break;
 		case MODE:
+			font(L"モードを選んでね").draw();
+			font(L"ぽやしみ～\t：かんたん。寝てても出来る\n難しくNASA\t：ふつう。最初はこれでしょ\nむずいンゴ!?\t：むずかしい。上級者向け\nオワタ\t\t：オワタ式。ミス即終了\n無理\t\t\t：無理").draw(50, 50);
+			font(L"Zキーで決定してゲームスタート！").draw(10, 400);
+			if (Input::KeyUp.clicked && gamemode != 0)
+			{
+				gamemode--;
+			}
+			if (Input::KeyDown.clicked && gamemode != 4)
+			{
+				gamemode++;
+			}
+			Line(10, (gamemode + 1) * 40 + 30, 40, (gamemode + 1) * 40 + 30).drawArrow(1, { 40, 30 }, Palette::White);
+
+			if (Input::KeyZ.clicked)
+			{
+				scene = GAME;
+				titlebgm.stop();
+				start.play();
+			}
+			break;
+		case PRECEDE:
 			break;
 		case GAME: {
 			//if (Input::KeyShift.pressed) {
@@ -180,8 +228,6 @@ void Main()
 				default:
 					break;
 				}
-
-
 				//弾丸更新
 				gun_normalcannon.bullet();
 				gun_laser.bullet();
@@ -190,28 +236,53 @@ void Main()
 
 				//命中判定
 
-				if (gun_normalcannon.gethit())
-				{
-					gun_normalcannon.unhit();
-					small_box.hittarget(gun_normalcannon,hit);
-					small_circle.hittarget(gun_normalcannon,hit);
-					small_moved_box.hittarget(gun_normalcannon,hit);
-				}
-				if (gun_laser.gethit())
-				{
-					gun_laser.unhit();
-					small_box.hittarget(gun_laser,hit);
-					small_circle.hittarget(gun_laser,hit);
-					small_moved_box.hittarget(gun_laser,hit);
+				for (auto& b : gun_normalcannon.bullets)
+					if (b.hit)
+					{
+						b.hit = false;
+						small_box.hittarget(b, hit);
+						small_circle.hittarget(b, hit);
+						small_moved_box.hittarget(b, hit);
+					}
+				for (auto& b : gun_laser.bullets)
+					if (b.hit)
+					{
+						b.hit = false;
+						small_box.hittarget(b, hit);
+						small_circle.hittarget(b, hit);
+						small_moved_box.hittarget(b, hit);
+					}
+				for (auto& b : gun_missile.bullets)
+					if (b.hit)
+					{
+						b.hit = false;
+						small_box.hittarget(b, hit);
+						small_circle.hittarget(b, hit);
+						small_moved_box.hittarget(b, hit);
+					}
 
-				}
-				if (gun_missile.gethit())
-				{
-					gun_missile.unhit();
-					small_box.hittarget(gun_missile,hit);
-					small_circle.hittarget(gun_missile,hit);
-					small_moved_box.hittarget(gun_missile,hit);
-				}
+				//if (gun_normalcannon.gethit())
+				//{
+				//	gun_normalcannon.unhit();
+				//	small_box.hittarget(gun_normalcannon,hit);
+				//	small_circle.hittarget(gun_normalcannon,hit);
+				//	small_moved_box.hittarget(gun_normalcannon,hit);
+				//}
+				//if (gun_laser.gethit())
+				//{
+				//	gun_laser.unhit();
+				//	small_box.hittarget(gun_laser,hit);
+				//	small_circle.hittarget(gun_laser,hit);
+				//	small_moved_box.hittarget(gun_laser,hit);
+
+				//}
+				//if (gun_missile.gethit())
+				//{
+				//	gun_missile.unhit();
+				//	small_box.hittarget(gun_missile,hit);
+				//	small_circle.hittarget(gun_missile,hit);
+				//	small_moved_box.hittarget(gun_missile,hit);
+				//}
 
 
 				//照準

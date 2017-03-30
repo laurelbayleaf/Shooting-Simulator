@@ -1,8 +1,6 @@
 #pragma once
-# include <Siv3D.hpp>
-
-
-
+#include <Siv3D.hpp>
+#include "Bullet.h"
 class shooting
 {
 public:
@@ -16,18 +14,15 @@ public:
 	~shooting();
 	void shoot();
 	void bullet();
-	bool gethit();
-	void unhit();
-	Circle makebullet();
-	Point ammopos();
-	int boomrange();
+	Array<Bullet>bullets;
+
 private:
-	int speed, rate, time, boom;
-	double alpha,size, Bsize = 0;
-	bool shoted = false, hit = false;
-	Point bulletpoint,bulletvelocity;
+	int speed, rate, boom, charge = 0;
+	double alpha, size;
+	bool hit = false;
 	TYPE type;
 	Sound se;
 	s3d::Color color;
+
 };
 
