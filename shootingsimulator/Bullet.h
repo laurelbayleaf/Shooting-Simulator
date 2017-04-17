@@ -9,8 +9,7 @@ public:
 	int speed, boom;
 	double alpha, size = 0;
 	Point bulletpoint, bulletvelocity;
-	bool hit = false;
-
+	bool hit = false, Delete = false;
 private:
 
 };

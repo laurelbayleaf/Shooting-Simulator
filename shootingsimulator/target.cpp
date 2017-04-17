@@ -72,6 +72,7 @@ void target::hittarget(Bullet b, Sound se)
 			if (Rect((int)size, (int)size2).setCenter((int)t.x, (int)t.y).intersects(b.bulletpoint)) {
 				se.playMulti();
 				Circle(b.bulletpoint, b.boom).draw(Palette::Red);//”š•—
+				b.Delete = true;
 				return true;
 			}
 			else
@@ -87,6 +88,7 @@ void target::hittarget(Bullet b, Sound se)
 				if (Circle(t, size).intersects(b.bulletpoint)) {
 					se.playMulti();
 					Circle(b.bulletpoint, b.boom).draw(Palette::Red);//”š•—
+					b.Delete = true;
 					return true;
 				}
 				else
@@ -100,6 +102,7 @@ void target::hittarget(Bullet b, Sound se)
 				if (Rect((int)size).setCenter(t).intersects(b.bulletpoint)) {
 					se.playMulti();
 					Circle(b.bulletpoint, b.boom).draw(Palette::Red);//”š•—
+					b.Delete = true;
 					return true;
 				}
 				else
@@ -111,8 +114,4 @@ void target::hittarget(Bullet b, Sound se)
 		});
 	}
 }
-
-
-
-
 

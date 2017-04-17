@@ -16,3 +16,4 @@ Bullet::Bullet(double si, int sp,int b, double a)
 Bullet::~Bullet()
 {
 }
+

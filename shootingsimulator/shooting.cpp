@@ -63,3 +63,18 @@ void shooting::bullet()
 		}
 	}
 }
+
+void shooting::bulletdelete()
+{
+	Erase_if(bullets, [&](Bullet b)
+	{
+		if (b.Delete)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	});
+}

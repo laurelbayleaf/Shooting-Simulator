@@ -239,7 +239,7 @@ void Main()
 				for (auto& b : gun_normalcannon.bullets)
 					if (b.hit)
 					{
-						b.hit = false;
+						b.Delete = true;
 						small_box.hittarget(b, hit);
 						small_circle.hittarget(b, hit);
 						small_moved_box.hittarget(b, hit);
@@ -247,7 +247,7 @@ void Main()
 				for (auto& b : gun_laser.bullets)
 					if (b.hit)
 					{
-						b.hit = false;
+						b.Delete = true;
 						small_box.hittarget(b, hit);
 						small_circle.hittarget(b, hit);
 						small_moved_box.hittarget(b, hit);
@@ -255,35 +255,17 @@ void Main()
 				for (auto& b : gun_missile.bullets)
 					if (b.hit)
 					{
-						b.hit = false;
+						b.Delete = true;
 						small_box.hittarget(b, hit);
 						small_circle.hittarget(b, hit);
 						small_moved_box.hittarget(b, hit);
 					}
 
-				//if (gun_normalcannon.gethit())
-				//{
-				//	gun_normalcannon.unhit();
-				//	small_box.hittarget(gun_normalcannon,hit);
-				//	small_circle.hittarget(gun_normalcannon,hit);
-				//	small_moved_box.hittarget(gun_normalcannon,hit);
-				//}
-				//if (gun_laser.gethit())
-				//{
-				//	gun_laser.unhit();
-				//	small_box.hittarget(gun_laser,hit);
-				//	small_circle.hittarget(gun_laser,hit);
-				//	small_moved_box.hittarget(gun_laser,hit);
+				//弾の消去
 
-				//}
-				//if (gun_missile.gethit())
-				//{
-				//	gun_missile.unhit();
-				//	small_box.hittarget(gun_missile,hit);
-				//	small_circle.hittarget(gun_missile,hit);
-				//	small_moved_box.hittarget(gun_missile,hit);
-				//}
-
+				gun_normalcannon.bulletdelete();
+				gun_laser.bulletdelete();
+				gun_missile.bulletdelete();
 
 				//照準
 				Line(Mouse::Pos().x - 50, Mouse::Pos().y, Mouse::Pos().x + 50, Mouse::Pos().y).draw();

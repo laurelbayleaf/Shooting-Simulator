@@ -14,6 +14,7 @@ public:
 	~shooting();
 	void shoot();
 	void bullet();
+	void bulletdelete();
 	Array<Bullet>bullets;
 
 private:
