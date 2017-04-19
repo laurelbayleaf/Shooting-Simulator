@@ -45,7 +45,9 @@ void Main()
 	const Font clear(30, Typeface::Medium);
 	const Font coment(15);
 
-	//int stage = 1, stagescore = 300, score = 0, roll = 0;
+	//int stage = 1, stagescore = 300, 
+	int score = 0;
+		//, roll = 0;
 	//double radian = Radians(roll);
 	int gamemode = 0;
 
@@ -55,8 +57,14 @@ void Main()
 	//int command = 0; //隠しコマンド用フラグ
 	//String commando;
 
-
-	//////////////////////////////////////////////////////////////////////
+	EventTimer eventTimer;
+	eventTimer.addEvent(L"3", 0.0s);
+	eventTimer.addEvent(L"2", 1.0s);
+	eventTimer.addEvent(L"1", 2.0s);
+	eventTimer.addEvent(L"GO!", 3.0s);
+	eventTimer.addEvent(L"start", 4.0s);
+	String count,equipedname;
+//////////////////////////////////////////////////////////////////////
 	enum SCENE {
 		TITLE,
 		GUIDANCE1,
@@ -69,7 +77,7 @@ void Main()
 		GAMEOVER,
 		RANKING
 	};
-	SCENE scene = GAME;
+	SCENE scene = TITLE;
 
 	//使用可能武器
 
@@ -120,7 +128,7 @@ void Main()
 			font(L"照準はマウスで\n左クリックで発射！\n\n\tZキーで次へ").draw(300, 300);
 			if (Input::KeyZ.clicked)
 			{
-				scene = GUIDANCE2;
+				scene = MODE;
 				next.playMulti();
 			}
 			break;
@@ -151,24 +159,52 @@ void Main()
 
 			if (Input::KeyZ.clicked)
 			{
-				scene = GAME;
+				scene = PRECEDE;
 				titlebgm.stop();
-				start.play();
+				//start.play();
+				eventTimer.start();
 			}
 			break;
-		case PRECEDE:
+		case PRECEDE: {
+			const auto elapsed = eventTimer.update();
+			if (eventTimer.onTriggered(L"3"))
+				count = L"3";
+			if (eventTimer.onTriggered(L"2"))
+				count = L"2";
+			if (eventTimer.onTriggered(L"1"))
+				count = L"1";
+			if (eventTimer.onTriggered(L"GO!"))
+				count = L"GO!";
+			clear(count).drawCenter(140);
+			if (eventTimer.onTriggered(L"start"))
+					scene = GAME;
 			break;
+		}
 		case GAME: {
 			//if (Input::KeyShift.pressed) {
 			//	s3d::Transformer2D trans(s3d::Mat3x2::Scale(rate));
 			//}
+			score = small_box.score + small_circle.score + small_moved_box.score;
 			camera.update();
 			{
 
 				const auto t1 = camera.createTransformer();
-
+				switch (equiped)
+				{
+				case normalcannon:
+				font(L"EQUIPED:normalcannon").draw(20, 400);
+					break;
+				case laser:
+				font(L"EQUIPED:laser").draw(20, 400);
+					break;
+				case missile:
+				font(L"EQUIPED:missile").draw(20, 400);
+					break;
+				default:
+					break;
+				}
 				font(L"\n\nカメラ").draw();
-
+				font(L"SCORE:",score).draw(20, 440);
 
 				////  的関連  ////
 

@@ -17,6 +17,7 @@ public:
 	void drawtarget();
 	void movextarget(Vec3 &v);
 	void hittarget(Bullet b,Sound se);
+	int score;
 
 private:
 

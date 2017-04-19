@@ -73,6 +73,7 @@ void target::hittarget(Bullet b, Sound se)
 				se.playMulti();
 				Circle(b.bulletpoint, b.boom).draw(Palette::Red);//”š•—
 				b.Delete = true;
+				score += 300;
 				return true;
 			}
 			else
@@ -89,6 +90,7 @@ void target::hittarget(Bullet b, Sound se)
 					se.playMulti();
 					Circle(b.bulletpoint, b.boom).draw(Palette::Red);//”š•—
 					b.Delete = true;
+					score += 100;
 					return true;
 				}
 				else
@@ -103,6 +105,7 @@ void target::hittarget(Bullet b, Sound se)
 					se.playMulti();
 					Circle(b.bulletpoint, b.boom).draw(Palette::Red);//”š•—
 					b.Delete = true;
+					score += 100;
 					return true;
 				}
 				else

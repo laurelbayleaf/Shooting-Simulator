@@ -71,6 +71,7 @@ void shooting::bulletdelete()
 		if (b.Delete)
 		{
 			return true;
+
 		}
 		else
 		{
