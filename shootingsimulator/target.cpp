@@ -72,8 +72,7 @@ void target::hittarget(Bullet b, Sound se)
 			if (Rect((int)size, (int)size2).setCenter((int)t.x, (int)t.y).intersects(b.bulletpoint)) {
 				se.playMulti();
 				Circle(b.bulletpoint, b.boom).draw(Palette::Red);//”š•—
-				b.Delete = true;
-				score += 300;
+				score += 200;
 				return true;
 			}
 			else
@@ -89,7 +88,6 @@ void target::hittarget(Bullet b, Sound se)
 				if (Circle(t, size).intersects(b.bulletpoint)) {
 					se.playMulti();
 					Circle(b.bulletpoint, b.boom).draw(Palette::Red);//”š•—
-					b.Delete = true;
 					score += 100;
 					return true;
 				}
@@ -104,7 +102,6 @@ void target::hittarget(Bullet b, Sound se)
 				if (Rect((int)size).setCenter(t).intersects(b.bulletpoint)) {
 					se.playMulti();
 					Circle(b.bulletpoint, b.boom).draw(Palette::Red);//”š•—
-					b.Delete = true;
 					score += 100;
 					return true;
 				}
@@ -118,3 +115,59 @@ void target::hittarget(Bullet b, Sound se)
 	}
 }
 
+void target::boomtarget(Bullet b, Sound se)
+{
+	if (type == moved_box)
+	{
+		Erase_if(movetargets, [&](Vec3 t) {
+			if (Rect((int)size, (int)size2).setCenter((int)t.x, (int)t.y).intersects(Circle(b.bulletpoint, b.boom))) {
+				Circle(b.bulletpoint, b.boom).draw(Palette::Red);//”š•—
+				se.playMulti();
+				score += 200;
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		});
+	}
+	else
+	{
+		Erase_if(targets, [&](const Point& t) {
+			if (type == circle) {
+				if (Circle(t, size).intersects(Circle(b.bulletpoint, b.boom))) {
+					Circle(b.bulletpoint, b.boom).draw(Palette::Red);//”š•—
+					se.playMulti();
+					score += 100;
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+
+			}
+			else
+			{
+				if (Rect((int)size).setCenter(t).intersects(Circle(b.bulletpoint, b.boom))) {
+					Circle(b.bulletpoint, b.boom).draw(Palette::Red);//”š•—
+					se.playMulti();
+					score += 100;
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+
+			}
+		});
+	}
+}
+
+void target::reset()
+{
+	targets.clear();
+	movetargets.clear();
+}

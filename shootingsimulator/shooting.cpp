@@ -1,6 +1,6 @@
 #include "shooting.h"
 #include "Bullet.h"
-shooting::shooting(double si, int sp, int ra, int b, TYPE t, double a, s3d::Color c,Sound s)
+shooting::shooting(double si, int sp, int ra, int b, TYPE t, double a,int co, s3d::Color c,Sound s)
 {
 	size = si;
 	speed = sp;
@@ -8,6 +8,7 @@ shooting::shooting(double si, int sp, int ra, int b, TYPE t, double a, s3d::Colo
 	boom = b;
 	type = t;
 	alpha = a;
+	cost = co;
 	color = c;
 	se = s;
 }
@@ -21,6 +22,7 @@ void shooting::shoot()
 	if (Input::MouseL.clicked && (charge <= 0))
 	{
 		bullets.emplace_back(size, speed, boom, alpha);
+		addcost();
 		se.playMulti(0.4);
 		charge += rate;
 	}
@@ -78,4 +80,9 @@ void shooting::bulletdelete()
 			return false;
 		}
 	});
+}
+
+void shooting::addcost()
+{
+	tortalcost += cost;
 }
