@@ -2,12 +2,13 @@
 #include "shooting.h"
 
 
-target::target(TYPE t, double s, double s2, double sp, s3d::Color c)
+target::target(TYPE t, double s, double s2, double sp, double ti, s3d::Color c)
 {
 	type = t;
 	size = s;
 	size2 = s2;
 	speed = sp;
+	time = ti;
 	color = c;
 }
 
@@ -29,20 +30,26 @@ void target::addtarget(Point p)
 
 void target::drawtarget()
 {
+	if (time - fade.s() < 0) {
+		reset();
+		cool.restart();
+		fade.reset();
+	}
+
 	switch (type)
 	{
 	case circle:
 		for (const auto& target : targets)
-			Circle(target,size).draw(color);
+			Circle(target, size).draw({ color,(uint32)(255 * (time - fade.s()) / time) });
 		break;
 	case box:
 		for (const auto& target : targets)
-			Rect((int)size).setCenter(target).draw(color);
+			Rect((int)size).setCenter(target).draw({ color,(uint32)(255 * (time - fade.s()) / time) });
 		break;
 	case moved_box:
 		for (auto& target : movetargets) {
 			movextarget(target);
-			Rect((int)size,(int)size2).setCenter((int)target.x,(int)target.y).draw(color);
+			Rect((int)size,(int)size2).setCenter((int)target.x,(int)target.y).draw({ color,(uint32)(255 * (time - fade.s()) / time) });
 		}
 	default:
 		break;
@@ -72,7 +79,7 @@ void target::hittarget(Bullet b, Sound se)
 			if (Rect((int)size, (int)size2).setCenter((int)t.x, (int)t.y).intersects(b.bulletpoint)) {
 				se.playMulti();
 				Circle(b.bulletpoint, b.boom).draw(Palette::Red);//”š•—
-				score += 200;
+				score += 250;
 				return true;
 			}
 			else
@@ -88,7 +95,7 @@ void target::hittarget(Bullet b, Sound se)
 				if (Circle(t, size).intersects(b.bulletpoint)) {
 					se.playMulti();
 					Circle(b.bulletpoint, b.boom).draw(Palette::Red);//”š•—
-					score += 100;
+					score += 150;
 					return true;
 				}
 				else
@@ -123,7 +130,7 @@ void target::boomtarget(Bullet b, Sound se)
 			if (Rect((int)size, (int)size2).setCenter((int)t.x, (int)t.y).intersects(Circle(b.bulletpoint, b.boom))) {
 				Circle(b.bulletpoint, b.boom).draw(Palette::Red);//”š•—
 				se.playMulti();
-				score += 200;
+				score += 250;
 				return true;
 			}
 			else
@@ -171,3 +178,16 @@ void target::reset()
 	targets.clear();
 	movetargets.clear();
 }
+
+bool target::checkvoid()
+{
+	if (targets.empty() + movetargets.empty() == 2)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+

@@ -11,7 +11,7 @@ public:
 		box,
 		moved_box,
 	};
-	target(TYPE t, double s, double s2, double sp, s3d::Color c);
+	target(TYPE t, double s, double s2, double sp, double ti,s3d::Color c);
 	~target();
 	void addtarget(Point p);
 	void drawtarget();
@@ -19,11 +19,12 @@ public:
 	void hittarget(Bullet b,Sound se);
 	void boomtarget(Bullet b, Sound se);
 	void reset();
+	bool checkvoid();
 	int score;
-
+	Stopwatch fade,cool;
 private:
 
-	double size, size2, speed;
+	double size, size2, speed, time;
 	TYPE type;
 	s3d::Color color;
 	Array<Point> targets;

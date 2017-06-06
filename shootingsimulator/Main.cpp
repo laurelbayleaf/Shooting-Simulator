@@ -34,15 +34,16 @@ void sorter(int sort[6], std::string names[6])
 
 void Main()
 {
-	Camera2D camera;
-	const std::array<s3d::Key, 6> keyConfig =
-	{
-		s3d::Input::KeyW, s3d::Input::KeyA, s3d::Input::KeyS, s3d::Input::KeyD,
-		s3d::Input::KeyShift, s3d::Input::KeyControl
-	};
-	camera.setKeyConfig(keyConfig);
+	//Camera2D camera;
+	//const std::array<s3d::Key, 6> keyConfig =
+	//{
+	//	s3d::Input::KeyW, s3d::Input::KeyA, s3d::Input::KeyS, s3d::Input::KeyD,
+	//	s3d::Input::KeyShift, s3d::Input::KeyControl
+	//};
+	//camera.setKeyConfig(keyConfig);
 	const Sound titlebgm(L"resource/titleBGM.mp3");
 	const Sound titlesound(L"resource/title.mp3");
+	const Sound stageBGM(L"resource/stageBGM.mp3");
 	const Sound next(L"resource/next.mp3");
 	const Sound mode(L"resource/mode.mp3");
 	const Sound start(L"resource/start.mp3");
@@ -72,9 +73,9 @@ void Main()
 	const Font coment(15);
 	const Font timeup(70, Typeface::Heavy, FontStyle::Outline);
 	timeup.changeOutlineStyle(TextOutlineStyle(Palette::Yellow, Palette::Whitesmoke, 2.0));
-	
+
 	int score;
-	int gamemode = 0;
+	//int gamemode = 0;
 
 	int scores[6] = { 0,0,0,0,0,0 };
 	std::string name[6] = { "A","B","C","D","E","F" };
@@ -87,10 +88,10 @@ void Main()
 	eventTimer.addEvent(L"GO!", 3.0s);
 	eventTimer.addEvent(L"start", 4.0s);
 	bool startswitch = false;
-	String count,equipedname;
+	String count, equipedname;
 
 	Stopwatch countdown;
-//////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////
 	enum SCENE {
 		TITLE,
 		GUIDANCE1,
@@ -123,17 +124,17 @@ void Main()
 
 	//武器種
 
-	shooting gun_normalcannon(40, 50, 50, 30, shooting::TYPE::normal, -1, 10, Palette::White, scannon);
+	shooting gun_normalcannon(40, 50, 30, 30, shooting::TYPE::normal, -1, 10, Palette::White, scannon);
 	shooting gun_laser(50, 30, 15, 30, shooting::TYPE::straight, -1, 30, Palette::Aqua, slaser);
-	shooting gun_missile(50, 50, 120, 60, shooting::TYPE::guided, 0.1, 100, Palette::Brown, smissile);
+	shooting gun_missile(50, 50, 100, 100, shooting::TYPE::guided, 0.1, 100, Palette::Brown, smissile);
 
 
 
 	//的種
 
-	target small_circle(target::TYPE::circle, 15,-1, -1, Palette::Limegreen);
-	target small_box(target::TYPE::box, 30, -1,-1, Palette::Aquamarine);
-	target small_moved_box(target::TYPE::moved_box,100,50,5,Palette::Blue);
+	target small_circle(target::TYPE::circle, 15, -1, -1, 7, Palette::Limegreen);
+	target small_box(target::TYPE::box, 30, -1, -1, 5, Palette::Aquamarine);
+	target small_moved_box(target::TYPE::moved_box, 100, 50, 5, 8, Palette::Blue);
 
 	while (System::Update())
 	{
@@ -150,8 +151,8 @@ void Main()
 			}
 			break;
 		case GUIDANCE1:
-			font(L"一分以内で的を狙って弾を当てよう！\n発射する度に、\n弾丸のコストでスコアが下がるよ！").draw(10,20);
-			font(L"照準はマウス操作\n左クリックで発射！\n左右キーで武器変更\n\tクリックで次へ").draw(300, 250);
+			font(L"一分以内で的を狙って弾を当てよう！\n的に当たるとスコアアップ！\n移動しているのは多めにもらえるよ\n発射する度に、\n弾丸のコストでスコアを消費するよ").draw(10, 20);
+			font(L"照準はマウス操作\n左クリックで発射！\nA,Dキーで武器変更\n\tクリックで次へ").draw(300, 250);
 			if (Input::MouseL.clicked)
 			{
 				scene = GUIDANCE2;
@@ -159,9 +160,9 @@ void Main()
 			}
 			break;
 		case GUIDANCE2:
-			font(L"SCORE\t:現在のスコア\n残り時間\t:現在の残り時間").draw(10,10);
-			font(L"\n\n\n\tクリックで次へ").draw(300, 300);
-			if (Input::MouseL.clicked)
+			font(L"SCORE\t:現在のスコア\n残り時間\t:現在の残り時間\nnormalcannon\t:消費コストが小さい砲。\nlaser\t:消費コスト中\n\t\t 弾速とリロードが早い。\nmissile\t:消費コストとリロード大\n\t\t 照準を追尾し、着弾点で大きく爆発").draw(10, 10);
+			font(L"クリックでゲームスタート！").drawCenter(350);
+			/*if (Input::MouseL.clicked)
 			{
 				gamemode = 1;
 				scene = MODE;
@@ -181,7 +182,7 @@ void Main()
 			{
 				gamemode++;
 			}
-			Line(10, (gamemode + 1) * 40 + 30, 40, (gamemode + 1) * 40 + 30).drawArrow(1, { 40, 30 }, Palette::White);
+			Line(10, (gamemode + 1) * 40 + 30, 40, (gamemode + 1) * 40 + 30).drawArrow(1, { 40, 30 }, Palette::White);*/
 
 			if (Input::MouseL.clicked)
 			{
@@ -191,17 +192,24 @@ void Main()
 				//初期化
 				eventTimer.start();
 				startswitch = false;
+				equiped = normalcannon;
 				small_box.score = 0;
 				small_circle.score = 0;
 				small_moved_box.score = 0;
 				gun_normalcannon.tortalcost = 0;
 				gun_laser.tortalcost = 0;
 				gun_missile.tortalcost = 0;
+				gun_normalcannon.charge = 0;
+				gun_missile.charge = 0;
+				gun_laser.charge = 0;
 				eventTimer.restart();
 				countdown.reset();
 				small_box.reset();
 				small_circle.reset();
 				small_moved_box.reset();
+				small_circle.cool.restart();
+				small_moved_box.cool.restart();
+
 			}
 			break;
 		case PRECEDE: {
@@ -238,160 +246,203 @@ void Main()
 			clear(count).drawCenter(140);
 			if (eventTimer.onTriggered(L"start")) {
 				countdown.start();
+				stageBGM.play();
+				stageBGM.setVolume(1.0);
 				scene = GAME;
 			}
 			break;
 		}
 		case GAME: {
 			score = small_box.score + small_circle.score + small_moved_box.score - (gun_normalcannon.tortalcost + gun_laser.tortalcost + gun_missile.tortalcost);
-			camera.update();
-			{
-				const auto t1 = camera.createTransformer();
+			//camera.update();
+
+				//const auto t1 = camera.createTransformer();
 
 				////  的関連  ////
 
 
 				//的追加
-				if (Input::KeyT.clicked) {
+
+				//手動
+			if (Input::KeyT.clicked) {
+				Point random;
+				random.x = Random(30, 610);
+				random.y = Random(30, 450);
+				small_box.addtarget(random);
+			}
+			if (Input::KeyY.clicked) {
+				Point random;
+				random.x = Random(30, 590);
+				random.y = Random(30, 430);
+				small_circle.addtarget(random);
+			}
+			if (Input::KeyU.clicked) {
+				Point random;
+				random.x = Random(30, 540);
+				random.y = Random(30, 430);
+				small_moved_box.addtarget(random);
+			}
+
+			//的出現
+			if (small_box.checkvoid())
+			{
+				for (int i = 0; i < 3; i++)
+				{
 					Point random;
-					random.x = Random(30, 640);
-					random.y = Random(30, 480);
+					random.x = Random(30, 610);
+					random.y = Random(30, 400);
 					small_box.addtarget(random);
 				}
-				if (Input::KeyY.clicked) {
-					Point random;
-					random.x = Random(30, 590);
-					random.y = Random(30, 430);
-					small_circle.addtarget(random);
-				}
-				if (Input::KeyU.clicked) {
-					Point random;
-					random.x = Random(30, 540);
-					random.y = Random(30, 430);
-					small_moved_box.addtarget(random);
-				}
-
-				//的描画
-
-				small_box.drawtarget();
-				small_circle.drawtarget();
-				small_moved_box.drawtarget();
-
-
-				////  発射機構  ////
-
-
-				//武器選択
-				if (Input::KeyRight.clicked && equiped != GUN::null)
+				small_box.fade.restart();
+			}
+			if (countdown.s() > 10) {
+				if (small_circle.checkvoid() && (small_circle.cool.s() > 3))
 				{
-					equiped++;
+					for (int i = 0; i < 3; i++)
+					{
+						Point random;
+						random.x = Random(30, 610);
+						random.y = Random(30, 400);
+						small_circle.addtarget(random);
+					}
+					small_circle.fade.restart();
 				}
-				if (Input::KeyLeft.clicked && equiped != GUN::normalcannon)
+				if (countdown.s() > 30) {
+					if (small_moved_box.checkvoid() && small_moved_box.cool.s() > 5)
+					{
+						for (int i = 0; i < 3; i++)
+						{
+							Point random;
+							random.x = Random(30, 540);
+							random.y = Random(30, 430);
+							small_moved_box.addtarget(random);
+						}
+						small_moved_box.fade.restart();
+					}
+				}
+			}
+
+			//的描画
+
+			small_box.drawtarget();
+			small_circle.drawtarget();
+			small_moved_box.drawtarget();
+
+
+			////  発射機構  ////
+
+
+			//武器選択
+			if (Input::KeyD.clicked && equiped != GUN::missile)
+			{
+				equiped++;
+			}
+			if (Input::KeyA.clicked && equiped != GUN::normalcannon)
+			{
+				equiped--;
+			}
+
+			//武器毎の発射処理
+			if (countdown.s() < 60)
+			{
+				switch (equiped)
 				{
-					equiped--;
+				case normalcannon:
+					gun_normalcannon.shoot();
+					break;
+				case laser:
+					gun_laser.shoot();
+					break;
+				case missile:
+					gun_missile.shoot();
+					break;
+				default:
+					break;
 				}
-
-				//武器毎の発射処理
-				if (countdown.s() < 60)
-				{
-					switch (equiped)
-					{
-					case normalcannon:
-						gun_normalcannon.shoot();
-						break;
-					case laser:
-						gun_laser.shoot();
-						break;
-					case missile:
-						gun_missile.shoot();
-						break;
-					default:
-						break;
-					}
-
-				}
-				//弾丸更新
-				gun_normalcannon.bullet();
-				gun_laser.bullet();
-				gun_missile.bullet();
-
-
-				//命中判定
-
-				for (auto& b : gun_normalcannon.bullets)
-					if (b.hit)
-					{
-						b.Delete = true;
-						small_box.hittarget(b, hit);
-						small_circle.hittarget(b, hit);
-						small_moved_box.hittarget(b, hit);
-					}
-				for (auto& b : gun_laser.bullets)
-					if (b.hit)
-					{
-						b.Delete = true;
-						small_box.hittarget(b, hit);
-						small_circle.hittarget(b, hit);
-						small_moved_box.hittarget(b, hit);
-					}
-				for (auto& b : gun_missile.bullets)
-					if (b.hit)
-					{
-						b.Delete = true;
-						small_box.hittarget(b, hit);
-						small_circle.hittarget(b, hit);
-						small_moved_box.hittarget(b, hit);
-						small_box.boomtarget(b,hit);
-						small_circle.boomtarget(b,hit);
-						small_moved_box.boomtarget(b,hit);
-					}
-
-				//弾の消去
-
-				gun_normalcannon.bulletdelete();
-				gun_laser.bulletdelete();
-				gun_missile.bulletdelete();
-
-				//照準
-				Line(Mouse::Pos().x - 50, Mouse::Pos().y, Mouse::Pos().x + 50, Mouse::Pos().y).draw();
-				Line(Mouse::Pos().x, Mouse::Pos().y - 50, Mouse::Pos().x, Mouse::Pos().y + 50).draw();
-				Circle sightframe(Mouse::Pos(), 50);
-				sightframe.drawFrame(3, 0);
 
 			}
-			camera.draw(Palette::Orange);
+			//弾丸更新
+			gun_normalcannon.bullet();
+			gun_laser.bullet();
+			gun_missile.bullet();
+
+
+			//命中判定
+
+			for (auto& b : gun_normalcannon.bullets)
+				if (b.hit)
+				{
+					b.Delete = true;
+					small_box.hittarget(b, hit);
+					small_circle.hittarget(b, hit);
+					small_moved_box.hittarget(b, hit);
+				}
+			for (auto& b : gun_laser.bullets)
+				if (b.hit)
+				{
+					b.Delete = true;
+					small_box.hittarget(b, hit);
+					small_circle.hittarget(b, hit);
+					small_moved_box.hittarget(b, hit);
+				}
+			for (auto& b : gun_missile.bullets)
+				if (b.hit)
+				{
+					b.Delete = true;
+					small_box.hittarget(b, hit);
+					small_circle.hittarget(b, hit);
+					small_moved_box.hittarget(b, hit);
+					small_box.boomtarget(b, hit);
+					small_circle.boomtarget(b, hit);
+					small_moved_box.boomtarget(b, hit);
+				}
+
+			//弾の消去
+
+			gun_normalcannon.bulletdelete();
+			gun_laser.bulletdelete();
+			gun_missile.bulletdelete();
+
+			//照準
+			Line(Mouse::Pos().x - 50, Mouse::Pos().y, Mouse::Pos().x + 50, Mouse::Pos().y).draw();
+			Line(Mouse::Pos().x, Mouse::Pos().y - 50, Mouse::Pos().x, Mouse::Pos().y + 50).draw();
+			Circle sightframe(Mouse::Pos(), 50);
+			sightframe.drawFrame(3, 0);
+
+			//camera.draw(Palette::Orange);
 
 			////  画面表示  ////
-			
+
 			switch (equiped)
 			{
 			case normalcannon:
 				font(L"EQUIPED:normalcannon").draw(10, 440);
-				Rect(10, 400, (gun_normalcannon.rate - gun_normalcannon.charge)*(200/ gun_normalcannon.rate), 40).draw(Palette::Yellow);
+				Rect(10, 400, (gun_normalcannon.rate - gun_normalcannon.charge)*((double)200 / gun_normalcannon.rate), 40).draw(Palette::Yellow);
 				break;
 			case laser:
 				font(L"EQUIPED:laser").draw(10, 440);
-				Rect(10, 400, (gun_laser.rate - gun_laser.charge)*(200/ gun_laser.rate), 40).draw(Palette::Yellow);
+				Rect(10, 400, (gun_laser.rate - gun_laser.charge)*((double)200 / gun_laser.rate), 40).draw(Palette::Yellow);
 				break;
 			case missile:
 				font(L"EQUIPED:missile").draw(10, 440);
-				Rect(10, 400, (gun_missile.rate - gun_missile.charge)*((double)200/ gun_missile.rate), 40).draw(Palette::Yellow);
+				Rect(10, 400, (gun_missile.rate - gun_missile.charge)*((double)200 / gun_missile.rate), 40).draw(Palette::Yellow);
 				break;
 			default:
 				break;
 			}
 			if (countdown.s() < 60)
 			{
-			font(L"残り", 60 - countdown.s(), L"秒").draw();
-			font(L"SCORE:", score).draw(0, 40);
+				font(L"残り", 60 - countdown.s(), L"秒").draw();
+				font(L"SCORE:", score).draw(0, 40);
+				font(L"PAUSE:P").draw(450, 20);
 			}
 
 			//ポーズ
 
-			font(L"PAUSE:P").draw(450, 20);
 			if (Input::KeyP.clicked) {
 				scene = PAUSE;
 				countdown.pause();
+				stageBGM.pause();
 				sp.playMulti();
 			}
 			if (countdown.s() >= 60)
@@ -401,9 +452,11 @@ void Main()
 					startswitch = true;
 					start.play();
 				}
+				stageBGM.setVolume(0.5);
 				timeup(L"TIME UP!").drawCenter(120);
 				if (countdown.s() >= 63) {
 					scene = GAMEOVER;
+					stageBGM.stop();
 					gameover.play();
 					gameover.setVolume(0.4);
 				}
@@ -417,6 +470,7 @@ void Main()
 			if (Input::KeyP.clicked) {
 				scene = GAME;
 				countdown.start();
+				stageBGM.play();
 				ep.playMulti();
 			}
 			break;
@@ -430,7 +484,7 @@ void Main()
 				name[5] = str.narrow();
 				scores[5] = score;
 				font(L"おめでとう！ハイスコア！").drawCenter(170, Palette::Yellow);
-				font(L"あなたの名前を残しませんか?\n\n↑ここで入力してね").drawCenter(210, Palette::Yellow);
+				font(L"あなたの名前を残しませんか?\n\nここで入力してね↑").drawCenter(210, Palette::Yellow);
 				font(L"名前：").draw(100, 250);
 				font(str).drawCenter(250);
 
